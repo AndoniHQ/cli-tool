@@ -10,9 +10,17 @@ permissions:
 
 jobs:
   release:
-    name: Release pushed tag
+    name: Release package
     runs-on: ubuntu-22.04
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.12
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -22,3 +30,16 @@ jobs:
               --repo="$GITHUB_REPOSITORY" \
               --title="${GITHUB_REPOSITORY#*/} ${tag#v}" \
               --generate-notes
+      
+      - name: 'Build 📦 Package linux x64'
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+        run: |
+          pyinstaller --onefile main.py -n cli-tool-linux-x64
+
+      - name: 'Realease package'
+        env:
+          GITHUB_TOKEN: ${{ github.TOKEN }}
+          tag: ${{ github.ref_name }}
+        run: |
+            gh release upload ${tag} ./dis/cli-tool-linux-x64
