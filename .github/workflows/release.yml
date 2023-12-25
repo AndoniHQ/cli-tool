@@ -47,4 +47,4 @@ jobs:
           GITHUB_TOKEN: ${{ github.TOKEN }}
           tag: ${{ github.ref_name }}
         run: |
-            gh release upload ${tag} ./dis/cli-tool-linux-x64
+            gh release upload ${tag} ./dist/cli-tool-linux-x64
