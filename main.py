@@ -1,6 +1,7 @@
 import typer
 import boto3
 import json
+from github import Github
 from updater import update
 from version import __version__
 from rich import print
@@ -14,10 +15,14 @@ def version_callback(value: bool):
         print(f"[bold]cli-tool version: [blue]{__version__}")
         raise typer.Exit()
 
-def update_callback(value: bool):
-    if value:
-        update()
-        raise typer.Exit()
+def check_updates(value: bool):
+    github = Github()
+    repo = github.get_repo("andonihq/cli-tool")
+    latest_version = repo.get_tags()[0].name
+    current_version = __version__
+
+    if latest_version != current_version:
+        print(f"[bold][yellow] There is a new version available")
 
 @app.command()
 def get_secret(secret_name: str):
@@ -39,9 +44,9 @@ def get_secret(secret_name: str):
 @app.callback()
 def main(
     version: bool = typer.Option(None, "-v", "--version", callback=version_callback, is_eager=True, help="Show version information."),
-    update: bool = typer.Option(None, "-u", "--update", callback=update_callback, is_eager=True, help="Update cli-tool"),
 ):
     return
    
 if __name__ == "__main__":
+    check_updates()
     app()
