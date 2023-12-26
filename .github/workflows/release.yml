@@ -39,6 +39,7 @@ jobs:
       - name: 'Build 📦 Package linux x64'
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
+          tag: ${{ github.ref_name }}
         run: |
           sed -i 's/v0.0.0/${tag}/g' version.py
           pyinstaller --onefile main.py -n cli-tool
