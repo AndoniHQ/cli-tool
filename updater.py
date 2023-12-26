@@ -1,4 +1,6 @@
 import requests
+import tempfile
+import shutil
 from github import Github
 from github.Repository import Repository
 from rich import print
@@ -20,21 +22,26 @@ def update():
         print(f"Latest version: [bold][blue]{latest_version}")
         print(f"Current version: [bold][yellow]{current_version}")
         update = Confirm.ask("[yellow]There is a new version, do you want to update?")
-        if update:
+
+    if update:
+        latest_release = repo.get_release(latest_version)
+        asset = next((asset for asset in latest_release.get_assets() if asset.name == "cli-tool"), None)
+        response = requests.get(asset.browser_download_url)
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as new_ver:
+            new_ver.write(response.text)
             try:
-                latest_release = repo.get_release(latest_version)
-                for asset in latest_release.get_assets():
-                    if asset.name == "cli-tool":
-                        print(asset.browser_download_url)
-                        response = requests.get(asset.browser_download_url)
-                        open("cli-tool", "wb").write(response.content)
+                shutil.move(new_ver.name, __file__)
+                print("[bold][green]Cli-tool updated sucessfully")
             except Exception as e:
-                print(f"Couldn't update sucessfully: {e}")
+                raise SystemExit(f"Error when trying to update: {e}")
 
     if latest_version == current_version:
         print(f"Latest version: [bold][blue]{latest_version}")
         print(f"Current version: [bold][green]{current_version}")
         print(f"[bold][green]You are up to date.")
+
+
+
 
     
 
