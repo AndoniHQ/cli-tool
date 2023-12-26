@@ -40,7 +40,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.TOKEN }}
         run: |
-          sed -i 's/v0.1.0/${tag}/g' version.py
+          sed -i 's/v0.0.0/${tag}/g' version.py
           pyinstaller --onefile main.py -n cli-tool
 
       - name: 'Realease package'
